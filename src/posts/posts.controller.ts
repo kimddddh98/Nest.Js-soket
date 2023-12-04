@@ -104,6 +104,10 @@ export class PostsController {
   }
   @Delete(':id')
   deletePost(@Param('id') id: string) {
+    const post = posts.find(post => post.id === +id)
+    if (!post) {
+      throw new NotFoundException()
+    }
     posts = posts.filter(post => post.id !== +id)
     return id
   }
