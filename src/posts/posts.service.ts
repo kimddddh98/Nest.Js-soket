@@ -60,17 +60,17 @@ export class PostsService {
     return post
   }
 
-  createPost(author: string, title: string, content: string) {
-    const post: PostModel = {
-      id: posts[posts.length - 1].id + 1,
+  async createPost(author: string, title: string, content: string) {
+    const post = this.postReposittory.create({
       author,
       title,
       content,
       likeCount: 0,
       commentCount: 0
-    }
-    posts = [...posts, post]
-    return post
+    })
+    const newPost = await this.postReposittory.save(post)
+    return newPost
+    // return post
   }
 
   updatePost(id: number, author?: string, title?: string, content?: string) {
