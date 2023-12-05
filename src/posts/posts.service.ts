@@ -1,13 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
+import { InjectRepository } from '@nestjs/typeorm'
+import { Repository } from 'typeorm'
+import { PostModel } from './entities/posts.entity'
 
-export interface PostModel {
-  id: number
-  author: string
-  title: string
-  content: string
-  likeCount: number
-  commentCount: number
-}
+// export interface PostModel {
+//   id: number
+//   author: string
+//   title: string
+//   content: string
+//   likeCount: number
+//   commentCount: number
+// }
 
 let posts: PostModel[] = [
   {
@@ -37,11 +40,20 @@ let posts: PostModel[] = [
 ]
 @Injectable()
 export class PostsService {
-  getAllPosts() {
+  constructor(
+    @InjectRepository(PostModel)
+    private readonly postReposittory: Repository<PostModel>
+  ) {}
+  async getAllPosts() {
+    const posts = await this.postReposittory.find()
     return posts
   }
-  getPostById(id: number) {
-    const post = posts.find(post => post.id === +id)
+  async getPostById(id: number) {
+    const post = await this.postReposittory.findOne({
+      where: {
+        id
+      }
+    })
     if (!post) {
       throw new NotFoundException()
     }
