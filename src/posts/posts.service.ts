@@ -12,7 +12,7 @@ import { PostModel } from './entities/posts.entity'
 //   commentCount: number
 // }
 
-let posts: PostModel[] = [
+const posts: PostModel[] = [
   {
     id: 1,
     author: 'official',
@@ -73,8 +73,17 @@ export class PostsService {
     // return post
   }
 
-  updatePost(id: number, author?: string, title?: string, content?: string) {
-    const post = posts.find(post => post.id === id)
+  async updatePost(
+    id: number,
+    author?: string,
+    title?: string,
+    content?: string
+  ) {
+    const post = await this.postReposittory.findOne({
+      where: {
+        id
+      }
+    })
     if (!post) {
       throw new NotFoundException()
     }
@@ -84,19 +93,25 @@ export class PostsService {
     if (title) {
       post.title = title
     }
-    if (post.content) {
+    if (content) {
       post.content = content
     }
-    posts = posts.map(prePost => (prePost.id === id ? post : prePost))
-    return post
+
+    const newPost = await this.postReposittory.save(post)
+
+    return newPost
   }
 
-  deletePost(id: number) {
-    const post = posts.find(post => post.id === id)
+  async deletePost(id: number) {
+    const post = await this.postReposittory.findOne({
+      where: {
+        id
+      }
+    })
     if (!post) {
       throw new NotFoundException()
     }
-    posts = posts.filter(post => post.id !== id)
+    await this.postReposittory.delete(post)
     return id
   }
 }
