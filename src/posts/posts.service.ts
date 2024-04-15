@@ -12,32 +12,6 @@ import { PostModel } from './entities/posts.entity'
 //   commentCount: number
 // }
 
-const posts: PostModel[] = [
-  {
-    id: 1,
-    author: 'official',
-    title: '제목',
-    content: '컨텐츠',
-    likeCount: 0,
-    commentCount: 0
-  },
-  {
-    id: 2,
-    author: 'official',
-    title: '2번째',
-    content: '오피셜 2번째',
-    likeCount: 9999,
-    commentCount: 9999
-  },
-  {
-    id: 3,
-    author: 'official',
-    title: '3번째',
-    content: '오피셜 3번째',
-    likeCount: 9999,
-    commentCount: 9999
-  }
-]
 @Injectable()
 export class PostsService {
   constructor(
@@ -45,14 +19,19 @@ export class PostsService {
     private readonly postReposittory: Repository<PostModel>
   ) {}
   async getAllPosts() {
-    const posts = await this.postReposittory.find()
+    const posts = await this.postReposittory.find({
+      relations: {
+        author: true
+      }
+    })
     return posts
   }
   async getPostById(id: number) {
     const post = await this.postReposittory.findOne({
       where: {
         id
-      }
+      },
+      relations: ['author']
     })
     if (!post) {
       throw new NotFoundException()
@@ -60,9 +39,11 @@ export class PostsService {
     return post
   }
 
-  async createPost(author: string, title: string, content: string) {
+  async createPost(authorId: number, title: string, content: string) {
     const post = this.postReposittory.create({
-      author,
+      author: {
+        id: authorId
+      },
       title,
       content,
       likeCount: 0,
@@ -73,12 +54,7 @@ export class PostsService {
     // return post
   }
 
-  async updatePost(
-    id: number,
-    author?: string,
-    title?: string,
-    content?: string
-  ) {
+  async updatePost(id: number, title?: string, content?: string) {
     const post = await this.postReposittory.findOne({
       where: {
         id
@@ -87,9 +63,7 @@ export class PostsService {
     if (!post) {
       throw new NotFoundException()
     }
-    if (author) {
-      post.author = author
-    }
+
     if (title) {
       post.title = title
     }
