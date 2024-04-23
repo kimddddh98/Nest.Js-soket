@@ -46,7 +46,7 @@ export class AuthService {
     const payload = {
       email: user.email,
       sub: user.id,
-      type: isRefreshToken
+      type: isRefreshToken ? 'refresh' : 'access'
     }
     return this.jwtService.sign(payload, {
       secret: JWT_SECRET,
@@ -102,5 +102,53 @@ export class AuthService {
       password: hash
     })
     return this.loginUser(newUser)
+  }
+
+  /* 
+    Header로 부터 받는방식
+    {authorization : Basic '{token}'} 이메일, 패스워드
+    {authorization : Bearer '{token}'} 토큰 그자체
+  */
+
+  extractTokenFromHeader(header: string, isBearer: boolean) {
+    // [Basic, {token}] 으로 나눠짐
+    const splitToken = header.split(' ')
+    const splitValueCheck = isBearer ? 'Bearer' : 'Basic'
+    if (splitToken.length !== 2 || splitToken[0] !== splitValueCheck) {
+      throw new UnauthorizedException('잘못된 토큰입니다.')
+    }
+    const token = splitToken[1]
+    return token
+  }
+  //  토큰을 디코드 후 스플릿 ,  email, password 값반환
+  decodeBasicToken(base64TokenString: string) {
+    const decoded = Buffer.from(base64TokenString, 'base64').toString('utf8')
+    const split = decoded.split(':')
+    if (split.length !== 2) {
+      throw new UnauthorizedException('잘못된 토큰입니다.')
+    }
+    const [email, password] = split
+    return {
+      email,
+      password
+    }
+  }
+
+  // 토큰 검증
+  veriftToken(token: string) {
+    return this.jwtService.verify(token, {
+      secret: JWT_SECRET
+    })
+  }
+
+  // 액세스 토큰 만료시마다 새로 발급해주는 로직
+  rotateToken(token: string, isRefreshToken: boolean) {
+    const decoded = this.jwtService.verify(token, {
+      secret: JWT_SECRET
+    })
+    if (decoded.type !== 'refresh') {
+      throw new UnauthorizedException('토큰의 타입이 refresh가 아닙니다.')
+    }
+    return this.signToken({ ...decoded }, isRefreshToken)
   }
 }
