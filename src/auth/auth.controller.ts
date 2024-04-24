@@ -1,6 +1,7 @@
 import { Controller, Body, Post, Headers, Res } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { Response } from 'express'
+import { MaxLengthPipe, MinLengthPipe } from './pipe/password.pipe'
 
 @Controller('auth')
 export class AuthController {
@@ -51,7 +52,8 @@ export class AuthController {
   resisterWithEmail(
     @Body('email') email: string,
     @Body('nickname') nickname: string,
-    @Body('password') password: string
+    @Body('password', new MaxLengthPipe(15), new MinLengthPipe(8))
+    password: string
   ) {
     return this.authService.resisterWithEmail({ email, nickname, password })
   }
