@@ -13,6 +13,14 @@ export class AuthController {
       accessToken: newToken
     }
   }
+  @Post('token/refresh')
+  postRefreshToken(@Headers('authorization') rawToken: string) {
+    const token = this.authService.extractTokenFromHeader(rawToken, false)
+    const newToken = this.authService.rotateToken(token, false)
+    return {
+      refreshToken: newToken
+    }
+  }
   @Post('login/email')
   async loginEmail(
     @Headers('authorization') rawToken: string,

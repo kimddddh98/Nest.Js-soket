@@ -108,10 +108,9 @@ export class AuthService {
     Header로 부터 받는방식
     {authorization : Basic '{token}'} 이메일, 패스워드
     {authorization : Bearer '{token}'} 토큰 그자체
-  */
 
+  */
   extractTokenFromHeader(header: string, isBearer: boolean) {
-    // [Basic, {token}] 으로 나눠짐
     const splitToken = header.split(' ')
     const splitValueCheck = isBearer ? 'Bearer' : 'Basic'
     if (splitToken.length !== 2 || splitToken[0] !== splitValueCheck) {
