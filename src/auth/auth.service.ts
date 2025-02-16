@@ -4,6 +4,7 @@ import { UsersModel } from 'src/users/entities/users.entity'
 import { HASH_ROUND, JWT_SECRET } from './const/auth.const'
 import { UsersService } from 'src/users/users.service'
 import * as bcrypt from 'bcrypt'
+import { ResisterUserDto } from './dto/resister-user.dto'
 @Injectable()
 export class AuthService {
   constructor(
@@ -93,9 +94,7 @@ export class AuthService {
     return this.loginUser(existUser)
   }
 
-  async resisterWithEmail(
-    user: Pick<UsersModel, 'email' | 'password' | 'nickname'>
-  ) {
+  async resisterWithEmail(user: ResisterUserDto) {
     const hash = await bcrypt.hash(user.password, HASH_ROUND)
     const newUser = await this.UsersSevice.createUser({
       ...user,
@@ -135,9 +134,13 @@ export class AuthService {
 
   // 토큰 검증
   veriftToken(token: string) {
-    return this.jwtService.verify(token, {
-      secret: JWT_SECRET
-    })
+    try {
+      return this.jwtService.verify(token, {
+        secret: JWT_SECRET
+      })
+    } catch (error) {
+      throw new UnauthorizedException('토큰이 만료되었습니다.')
+    }
   }
 
   // 액세스 토큰 만료시마다 새로 발급해주는 로직

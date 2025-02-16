@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { ClassSerializerInterceptor, Module } from '@nestjs/common'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { PostsModule } from './posts/posts.module'
@@ -7,7 +7,11 @@ import { PostModel } from './posts/entities/posts.entity'
 import { UsersModule } from './users/users.module'
 import { UsersModel } from './users/entities/users.entity'
 import { AuthModule } from './auth/auth.module'
-import { CommonModule } from './common/common.module';
+import { CommonModule } from './common/common.module'
+import { ServeStaticModule } from '@nestjs/serve-static'
+import { APP_INTERCEPTOR } from '@nestjs/core'
+import { RoomsModule } from './rooms/rooms.module'
+import { RoomsModel } from './rooms/entities/rooms.entity'
 
 @Module({
   imports: [
@@ -19,14 +23,25 @@ import { CommonModule } from './common/common.module';
       username: 'postgres',
       password: 'postgres',
       database: 'postgres',
-      entities: [PostModel, UsersModel],
+      entities: [PostModel, UsersModel, RoomsModel],
       synchronize: true
     }),
     UsersModule,
     AuthModule,
-    CommonModule
+    CommonModule,
+    ServeStaticModule.forRoot({
+      rootPath: 'public',
+      serveRoot: '/public'
+    }),
+    RoomsModule
   ],
   controllers: [AppController],
-  providers: [AppService]
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ClassSerializerInterceptor
+    }
+  ]
 })
 export class AppModule {}
