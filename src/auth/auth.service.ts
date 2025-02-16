@@ -4,7 +4,7 @@ import { UsersModel } from 'src/users/entities/users.entity'
 import { HASH_ROUND, JWT_SECRET } from './const/auth.const'
 import { UsersService } from 'src/users/users.service'
 import * as bcrypt from 'bcrypt'
-import { ResisterUserDto } from './dto/resister-user.dto'
+import { RegisterUserDto } from './dto/register-user.dto'
 @Injectable()
 export class AuthService {
   constructor(
@@ -12,7 +12,7 @@ export class AuthService {
     private readonly UsersSevice: UsersService
   ) {}
   /* 
-    resisterWithEmail 회원가입
+    registerWithEmail 회원가입
       - 이메일, 비밀번호, 닉네임을 입력받아 사용자 생성  
       - 완료시 엑세스토큰, 리프레쉬토큰 발급
       - 회원가입시 바로 로그인
@@ -94,7 +94,7 @@ export class AuthService {
     return this.loginUser(existUser)
   }
 
-  async resisterWithEmail(user: ResisterUserDto) {
+  async registerWithEmail(user: RegisterUserDto) {
     const hash = await bcrypt.hash(user.password, HASH_ROUND)
     const newUser = await this.UsersSevice.createUser({
       ...user,
