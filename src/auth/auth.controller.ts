@@ -34,7 +34,7 @@ export class AuthController {
     const token = this.authService.extractTokenFromHeader(rawToken, false)
     const credentials = this.authService.decodeBasicToken(token)
 
-    const { accessToken, refreshToken } =
+    const { accessToken, refreshToken, user } =
       await this.authService.loginWithEmail(credentials)
 
     // res.cookie('accessToken', accessToken, {
@@ -50,7 +50,8 @@ export class AuthController {
 
     return {
       accessToken,
-      refreshToken
+      refreshToken,
+      user
     }
     // return true
     // return this.authService.loginWithEmail(credentials)
