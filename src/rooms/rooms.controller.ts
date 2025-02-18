@@ -6,7 +6,8 @@ import {
   Patch,
   Param,
   Delete,
-  UseGuards
+  UseGuards,
+  ParseIntPipe
 } from '@nestjs/common'
 import { RoomsService } from './rooms.service'
 import { CreateRoomDto } from './dto/create-room.dto'
@@ -44,7 +45,10 @@ export class RoomsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.roomsService.remove(+id)
+  @UseGuards(AccessTokenGuard)
+  remove(@User() user: UsersModel, @Param('id', ParseIntPipe) id: number) {
+    console.log('user', user)
+    console.log('id', id)
+    return this.roomsService.remove(user, id)
   }
 }

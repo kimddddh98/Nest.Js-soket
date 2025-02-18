@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common'
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException
+} from '@nestjs/common'
 import { CreateRoomDto } from './dto/create-room.dto'
 import { UpdateRoomDto } from './dto/update-room.dto'
 import { UsersModel } from 'src/users/entities/users.entity'
@@ -41,7 +45,31 @@ export class RoomsService {
     return `This action updates a #${id} room`
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} room`
+  async remove(user: UsersModel, id: number) {
+    const room = await this.roomsRepository.findOne({
+      where: {
+        id
+      },
+      relations: {
+        createUser: true
+      }
+    })
+
+    if (!room) {
+      throw new NotFoundException('채팅방이 존재하지 않습니다.')
+    }
+    if (room.createUser.id !== user.id) {
+      throw new ForbiddenException('삭제 권한이 없습니다.')
+    }
+
+    const deleteRoom = await this.roomsRepository.delete(id)
+    console.log('deleteRoom', deleteRoom)
+    if (deleteRoom.affected === 0) {
+      throw new NotFoundException('채팅방이 존재하지 않습니다.')
+    }
+
+    return {
+      message: '채팅방이 삭제되었습니다.'
+    }
   }
 }
