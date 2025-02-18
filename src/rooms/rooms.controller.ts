@@ -19,12 +19,14 @@ import { UsersModel } from 'src/users/entities/users.entity'
 export class RoomsController {
   constructor(private readonly roomsService: RoomsService) {}
 
+  // 채팅방 생성
   @Post()
   @UseGuards(AccessTokenGuard)
   create(@User() user: UsersModel, @Body() createRoomDto: CreateRoomDto) {
     return this.roomsService.create(user, createRoomDto)
   }
 
+  // 채팅방 목록 조회
   @Get()
   @UseGuards(AccessTokenGuard)
   findAllRooms(@User() user: UsersModel) {

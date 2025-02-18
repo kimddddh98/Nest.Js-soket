@@ -62,4 +62,10 @@ export class UsersModel extends BaseModel {
 
   @OneToMany(() => RoomsModel, room => room.createUser)
   rooms: RoomsModel[]
+
+  @Column({
+    nullable: true
+  })
+  @Expose()
+  profileImageUrl: string
 }
