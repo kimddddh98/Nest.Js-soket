@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { UsersModel } from './entities/users.entity'
 import { Repository } from 'typeorm'
@@ -54,5 +58,18 @@ export class UsersService {
         email
       }
     })
+  }
+
+  // 상세조회
+  async getUser(id: number) {
+    const user = await this.userReposittory.findOne({
+      where: {
+        id
+      }
+    })
+    if (!user) {
+      throw new NotFoundException('존재하지 않는 유저입니다.')
+    }
+    return user
   }
 }
