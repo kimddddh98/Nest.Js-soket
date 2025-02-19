@@ -51,4 +51,11 @@ export class RoomsController {
     console.log('id', id)
     return this.roomsService.remove(user, id)
   }
+
+  // 채팅방 북마크
+  @Post(':id/bookmark')
+  @UseGuards(AccessTokenGuard)
+  bookmark(@User() user: UsersModel, @Param('id', ParseIntPipe) id: number) {
+    return this.roomsService.bookmark(user, id)
+  }
 }

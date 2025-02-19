@@ -12,7 +12,8 @@ import { ServeStaticModule } from '@nestjs/serve-static'
 import { APP_INTERCEPTOR } from '@nestjs/core'
 import { RoomsModule } from './rooms/rooms.module'
 import { RoomsModel } from './rooms/entities/rooms.entity'
-
+import { BookmarkModule } from './bookmark/bookmark.module'
+import { BookmarkModel } from './bookmark/entities/bookmark.entity'
 @Module({
   imports: [
     PostsModule,
@@ -23,7 +24,7 @@ import { RoomsModel } from './rooms/entities/rooms.entity'
       username: 'postgres',
       password: 'postgres',
       database: 'postgres',
-      entities: [PostModel, UsersModel, RoomsModel],
+      entities: [PostModel, UsersModel, RoomsModel, BookmarkModel],
       synchronize: true
     }),
     UsersModule,
@@ -33,7 +34,8 @@ import { RoomsModel } from './rooms/entities/rooms.entity'
       rootPath: 'public',
       serveRoot: '/public'
     }),
-    RoomsModule
+    RoomsModule,
+    BookmarkModule
   ],
   controllers: [AppController],
   providers: [

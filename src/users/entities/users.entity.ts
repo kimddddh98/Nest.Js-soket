@@ -8,6 +8,7 @@ import { stringMessage } from 'src/common/validation-message/string.message'
 import { emailMessage } from 'src/common/validation-message/email.message'
 import { Exclude, Expose } from 'class-transformer'
 import { RoomsModel } from 'src/rooms/entities/rooms.entity'
+import { BookmarkModel } from 'src/bookmark/entities/bookmark.entity'
 @Entity()
 @Exclude()
 export class UsersModel extends BaseModel {
@@ -60,8 +61,13 @@ export class UsersModel extends BaseModel {
   @OneToMany(() => PostModel, post => post.author)
   posts: PostModel[]
 
+  @Expose()
   @OneToMany(() => RoomsModel, room => room.createUser)
   rooms: RoomsModel[]
+
+  @Expose()
+  @OneToMany(() => BookmarkModel, bookmark => bookmark.user)
+  bookmarks: BookmarkModel[]
 
   @Column({
     nullable: true
