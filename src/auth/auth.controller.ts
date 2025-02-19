@@ -19,7 +19,7 @@ export class AuthController {
   @Post('token/refresh')
   @UseGuards(RefreshTokenGuard)
   postRefreshToken(@Headers('authorization') rawToken: string) {
-    const token = this.authService.extractTokenFromHeader(rawToken, false)
+    const token = this.authService.extractTokenFromHeader(rawToken, true)
     const newToken = this.authService.rotateToken(token, false)
     return {
       refreshToken: newToken
