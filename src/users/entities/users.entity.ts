@@ -1,4 +1,4 @@
-import { Entity, Column, OneToMany } from 'typeorm'
+import { Entity, Column, OneToMany, ManyToMany, JoinTable } from 'typeorm'
 import { RolesEnum } from '../const/roles.const'
 import { PostModel } from 'src/posts/entities/posts.entity'
 import { BaseModel } from 'src/common/entities/base.entity'
@@ -74,4 +74,10 @@ export class UsersModel extends BaseModel {
   })
   @Expose()
   profileImageUrl: string
+
+  //내가 속한 방들
+  @Expose()
+  @ManyToMany(() => RoomsModel, room => room.userList)
+  @JoinTable()
+  myRooms: RoomsModel[]
 }

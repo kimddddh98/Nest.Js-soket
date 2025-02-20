@@ -11,6 +11,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { RoomsModel } from './entities/rooms.entity'
 import { Repository } from 'typeorm'
 import { BookmarkModel } from 'src/bookmark/entities/bookmark.entity'
+import { InviteRoomDto } from './dto/invite-room.dto'
 
 @Injectable()
 export class RoomsService {
@@ -18,12 +19,15 @@ export class RoomsService {
     @InjectRepository(RoomsModel)
     private readonly roomsRepository: Repository<RoomsModel>,
     @InjectRepository(BookmarkModel)
-    private readonly bookmarkRepository: Repository<BookmarkModel>
+    private readonly bookmarkRepository: Repository<BookmarkModel>,
+    @InjectRepository(UsersModel)
+    private readonly usersRepository: Repository<UsersModel>
   ) {}
   async create(user: UsersModel, createRoomDto: CreateRoomDto) {
     const createRoom = this.roomsRepository.create({
       roomName: createRoomDto.roomName ?? user.nickname,
-      createUser: user
+      createUser: user,
+      userList: [user]
     })
     const saveRoom = await this.roomsRepository.save(createRoom)
 
@@ -33,11 +37,12 @@ export class RoomsService {
   async findAllRoom(user: UsersModel) {
     const rooms = await this.roomsRepository.find({
       where: {
-        createUser: {
+        userList: {
           id: user.id
         }
       },
       relations: {
+        userList: true,
         bookmarks: {
           user: true
         }
@@ -50,8 +55,16 @@ export class RoomsService {
     return bookmarkRooms
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} room`
+  async findOne(id: number) {
+    const room = await this.roomsRepository.findOne({
+      where: {
+        id
+      }
+    })
+    if (!room) {
+      throw new NotFoundException('채팅방이 존재하지 않습니다.')
+    }
+    return room
   }
 
   update(id: number, updateRoomDto: UpdateRoomDto) {
@@ -76,7 +89,6 @@ export class RoomsService {
     }
 
     const deleteRoom = await this.roomsRepository.delete(id)
-    console.log('deleteRoom', deleteRoom)
     if (deleteRoom.affected === 0) {
       throw new NotFoundException('채팅방이 존재하지 않습니다.')
     }
@@ -127,5 +139,35 @@ export class RoomsService {
     })
     const saveBookmark = await this.bookmarkRepository.save(bookmark)
     return saveBookmark
+  }
+
+  async inviteRoom(inviteRoomDto: InviteRoomDto) {
+    const { id, inviteUserId } = inviteRoomDto
+    const room = await this.roomsRepository.findOne({
+      where: { id },
+      relations: {
+        userList: true
+      }
+    })
+
+    if (!room) {
+      throw new NotFoundException('채팅방이 존재하지 않습니다.')
+    }
+
+    const user = await this.usersRepository.findOne({
+      where: { id: inviteUserId }
+    })
+
+    if (!user) {
+      throw new NotFoundException('초대할 유저가 존재하지 않습니다.')
+    }
+
+    if (room.userList.some(user => user.id === inviteUserId)) {
+      throw new BadRequestException('이미 채팅방에 속해있습니다.')
+    }
+
+    room.userList.push(user)
+    const saveRoom = await this.roomsRepository.save(room)
+    return saveRoom
   }
 }

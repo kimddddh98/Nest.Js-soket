@@ -6,9 +6,10 @@ import { RoomsModel } from './entities/rooms.entity'
 import { UsersModule } from 'src/users/users.module'
 import { AuthModule } from 'src/auth/auth.module'
 import { BookmarkModel } from 'src/bookmark/entities/bookmark.entity'
+import { UsersModel } from 'src/users/entities/users.entity'
 @Module({
   imports: [
-    TypeOrmModule.forFeature([RoomsModel, BookmarkModel]),
+    TypeOrmModule.forFeature([RoomsModel, BookmarkModel, UsersModel]),
     UsersModule,
     AuthModule
   ],

@@ -15,6 +15,7 @@ import { UpdateRoomDto } from './dto/update-room.dto'
 import { AccessTokenGuard } from 'src/auth/guard/bearer-token.guard'
 import { User } from 'src/users/decorator/user.decorator'
 import { UsersModel } from 'src/users/entities/users.entity'
+import { InviteRoomDto } from './dto/invite-room.dto'
 
 @Controller('rooms')
 export class RoomsController {
@@ -47,15 +48,19 @@ export class RoomsController {
   @Delete(':id')
   @UseGuards(AccessTokenGuard)
   remove(@User() user: UsersModel, @Param('id', ParseIntPipe) id: number) {
-    console.log('user', user)
-    console.log('id', id)
     return this.roomsService.remove(user, id)
   }
 
   // 채팅방 북마크
-  @Post(':id/bookmark')
+  @Post('/bookmark')
   @UseGuards(AccessTokenGuard)
-  bookmark(@User() user: UsersModel, @Param('id', ParseIntPipe) id: number) {
-    return this.roomsService.bookmark(user, id)
+  bookmark(@User() user: UsersModel, @Body('roomId') roomId: number) {
+    return this.roomsService.bookmark(user, roomId)
+  }
+
+  @Post('/inviteRoom')
+  @UseGuards(AccessTokenGuard)
+  inviteRoom(@Body() inviteRoomDto: InviteRoomDto) {
+    return this.roomsService.inviteRoom(inviteRoomDto)
   }
 }
