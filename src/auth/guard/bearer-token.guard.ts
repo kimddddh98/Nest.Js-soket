@@ -38,7 +38,6 @@ export class AccessTokenGuard extends BearerTokenGuard {
     await super.canActivate(context)
 
     const request = context.switchToHttp().getRequest()
-    console.log('request.tokenType', request.tokenType)
     if (request.tokenType !== 'access') {
       throw new UnauthorizedException('access token이 필요합니다.')
     }

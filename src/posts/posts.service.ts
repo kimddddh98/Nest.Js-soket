@@ -198,7 +198,7 @@ export class PostsService {
     if (!post) {
       throw new NotFoundException()
     }
-    await this.postReposittory.delete(post)
+    await this.postReposittory.delete(id)
     return id
   }
 }
