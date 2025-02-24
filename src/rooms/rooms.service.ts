@@ -34,6 +34,13 @@ export class RoomsService {
     return saveRoom
   }
 
+  checkingBookMark = (bookmarks: BookmarkModel[], user: UsersModel) => {
+    const isBookmarked = bookmarks?.some(
+      bookmark => bookmark?.user.id === user.id
+    )
+    return isBookmarked
+  }
+
   async findAllRoom(user: UsersModel) {
     const rooms = await this.roomsRepository.find({
       where: {
@@ -50,21 +57,33 @@ export class RoomsService {
     })
     const bookmarkRooms = rooms.map(({ bookmarks, ...room }) => ({
       ...room,
-      isBookmarked: bookmarks?.some(bookmark => bookmark?.user.id === user.id)
+      isBookmarked: this.checkingBookMark(bookmarks, user)
     }))
     return bookmarkRooms
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, user: UsersModel) {
     const room = await this.roomsRepository.findOne({
       where: {
         id
+      },
+      relations: {
+        createUser: true,
+        userList: true,
+        bookmarks: {
+          user: true
+        }
       }
     })
     if (!room) {
       throw new NotFoundException('채팅방이 존재하지 않습니다.')
     }
-    return room
+    const { bookmarks, ...rest } = room
+    const isBookmarked = this.checkingBookMark(bookmarks, user)
+    return {
+      ...rest,
+      isBookmarked
+    }
   }
 
   update(id: number, updateRoomDto: UpdateRoomDto) {

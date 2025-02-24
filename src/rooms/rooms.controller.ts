@@ -36,8 +36,9 @@ export class RoomsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.roomsService.findOne(+id)
+  @UseGuards(AccessTokenGuard)
+  findOne(@User() user: UsersModel, @Param('id') id: number) {
+    return this.roomsService.findOne(id, user)
   }
 
   @Patch(':id')
