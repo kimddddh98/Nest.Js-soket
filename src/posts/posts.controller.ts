@@ -8,7 +8,9 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards
+  UploadedFile,
+  UseGuards,
+  UseInterceptors
 } from '@nestjs/common'
 import { PostsService } from './posts.service'
 import { AccessTokenGuard } from 'src/auth/guard/bearer-token.guard'
@@ -17,6 +19,7 @@ import { UsersModel } from 'src/users/entities/users.entity'
 import { CreatePostDto } from './dto/create-post.dto'
 import { UpdatePostDto } from './dto/update-post.dto'
 import { PaginatePostDto } from './dto/paginate-post.dto'
+import { FileInterceptor } from '@nestjs/platform-express'
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
@@ -39,9 +42,14 @@ export class PostsController {
 
   @Post()
   @UseGuards(AccessTokenGuard)
-  postPost(@User() user: UsersModel, @Body() createPostDto: CreatePostDto) {
+  @UseInterceptors(FileInterceptor('image'))
+  postPost(
+    @User() user: UsersModel,
+    @Body() createPostDto: CreatePostDto,
+    @UploadedFile() file?: Express.Multer.File
+  ) {
     const authorId = user.id
-    return this.postsService.createPost(authorId, createPostDto)
+    return this.postsService.createPost(authorId, createPostDto, file?.filename)
   }
   // postType: "SIMPLE_REVIEW",
   //       title: title.value.length > 0 ? title.value : null,

@@ -8,10 +8,12 @@ import {
 import { BaseModel } from './entities/base.entity'
 import { BasePaginationDto } from './dto/base-pagination.dto'
 import { FilterMapper } from './const/filter-mapper.const'
-import { count } from 'console'
+import { ConfigService } from '@nestjs/config'
+import { envKeys } from './const/env-keys.const'
 
 @Injectable()
 export class CommonService {
+  constructor(private readonly configService: ConfigService) {}
   async paginate<T extends BaseModel>(
     dto: BasePaginationDto,
     repository: Repository<T>,
@@ -43,6 +45,19 @@ export class CommonService {
     }
   }
 
+  /**
+   * RESPONSE 형식
+   * {
+   *  data: PostModel[]
+   *  count: number
+   *  cursor :{
+   *    마지막 응답 데이터의 id
+   *    after: number
+   *   }
+   *   다음페이지에 조회활 url
+   *   next :  string
+   * }
+   */
   private async cursorPagenate<T extends BaseModel>(
     dto: BasePaginationDto,
     repository: Repository<T>,
@@ -60,7 +75,9 @@ export class CommonService {
       result.length > 0 && result.length === dto.take
         ? result[result.length - 1]
         : null
-    const nextURL = lastPost && new URL(`http://localhost:4000/${path}`)
+    const nextURL =
+      lastPost &&
+      new URL(`${this.configService.get<string>(envKeys.BASE_URL)}/${path}`)
 
     if (nextURL) {
       for (const key of Object.keys(dto)) {
