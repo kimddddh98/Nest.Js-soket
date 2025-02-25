@@ -14,16 +14,25 @@ import { RoomsModule } from './rooms/rooms.module'
 import { RoomsModel } from './rooms/entities/rooms.entity'
 import { BookmarkModule } from './bookmark/bookmark.module'
 import { BookmarkModel } from './bookmark/entities/bookmark.entity'
+import { ConfigModule } from '@nestjs/config'
+import {
+  PUBLIC_FOLDER_NAME,
+  PUBLIC_FOLDER_PATH
+} from './common/const/path.const'
 @Module({
   imports: [
     PostsModule,
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+      isGlobal: true
+    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: '127.0.0.1',
-      port: 5432,
-      username: 'postgres',
-      password: 'postgres',
-      database: 'postgres',
+      host: process.env.POSTGRES_HOST,
+      port: parseInt(process.env.POSTGRES_PORT),
+      username: process.env.POSTGRES_USERNAME,
+      password: process.env.POSTGRES_PASSWORD,
+      database: process.env.POSTGRES_DATABASE,
       entities: [PostModel, UsersModel, RoomsModel, BookmarkModel],
       synchronize: true
     }),
@@ -31,7 +40,11 @@ import { BookmarkModel } from './bookmark/entities/bookmark.entity'
     AuthModule,
     CommonModule,
     ServeStaticModule.forRoot({
-      rootPath: 'public',
+      rootPath: PUBLIC_FOLDER_NAME,
+      /**
+          rootPath 가 제외되어 보이게 되면 posts 로 업로드 할 경우
+          posts/image.jpg 로 접근이 가능한데 posts 컨트롤러가 존재하기떄문에 serveRoot를 설정
+       */
       serveRoot: '/public'
     }),
     RoomsModule,

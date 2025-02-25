@@ -1,15 +1,18 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { UsersModel } from 'src/users/entities/users.entity'
-import { HASH_ROUND, JWT_SECRET } from './const/auth.const'
+// import { HASH_ROUND, JWT_SECRET } from './const/auth.const'
 import { UsersService } from 'src/users/users.service'
 import * as bcrypt from 'bcrypt'
 import { RegisterUserDto } from './dto/register-user.dto'
+import { ConfigService } from '@nestjs/config'
+import { envKeys } from 'src/common/const/env-keys.const'
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly UsersSevice: UsersService
+    private readonly usersService: UsersService,
+    private readonly configService: ConfigService
   ) {}
   /* 
     registerWithEmail 회원가입
@@ -50,7 +53,7 @@ export class AuthService {
       type: isRefreshToken ? 'refresh' : 'access'
     }
     return this.jwtService.sign(payload, {
-      secret: JWT_SECRET,
+      secret: this.configService.get<string>(envKeys.JWT_SECRET_KEY),
       // 리프레쉬토큰은 1일 액세스토큰은 15분
       expiresIn: isRefreshToken ? 1000 * 60 * 60 * 24 : 1000 * 60 * 15
     })
@@ -69,7 +72,7 @@ export class AuthService {
   ) {
     // -사용자 이메일이 존재하는지 확인
     //  확인하려면 userRepository 사용필요
-    const existUser = await this.UsersSevice.findUserEmail(user.email)
+    const existUser = await this.usersService.findUserEmail(user.email)
     if (!existUser) {
       throw new UnauthorizedException('존재하지 않는 사용자입니다.')
     }
@@ -97,8 +100,11 @@ export class AuthService {
   }
 
   async registerWithEmail(user: RegisterUserDto) {
-    const hash = await bcrypt.hash(user.password, HASH_ROUND)
-    const newUser = await this.UsersSevice.createUser({
+    const hash = await bcrypt.hash(
+      user.password,
+      parseInt(this.configService.get<string>(envKeys.HASH_ROUND))
+    )
+    const newUser = await this.usersService.createUser({
       ...user,
       password: hash
     })
@@ -138,7 +144,7 @@ export class AuthService {
   veriftToken(token: string) {
     try {
       return this.jwtService.verify(token, {
-        secret: JWT_SECRET
+        secret: this.configService.get<string>(envKeys.JWT_SECRET_KEY)
       })
     } catch (error) {
       throw new UnauthorizedException('토큰이 만료되었습니다.')
@@ -148,7 +154,7 @@ export class AuthService {
   // 액세스 토큰 만료시마다 새로 발급해주는 로직
   rotateToken(token: string, isRefreshToken: boolean) {
     const decoded = this.jwtService.verify(token, {
-      secret: JWT_SECRET
+      secret: this.configService.get<string>(envKeys.JWT_SECRET_KEY)
     })
     if (decoded.type !== 'refresh') {
       throw new UnauthorizedException('토큰의 타입이 refresh가 아닙니다.')
