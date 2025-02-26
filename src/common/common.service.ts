@@ -10,6 +10,8 @@ import { BasePaginationDto } from './dto/base-pagination.dto'
 import { FilterMapper } from './const/filter-mapper.const'
 import { ConfigService } from '@nestjs/config'
 import { envKeys } from './const/env-keys.const'
+import { TEMP_FOLDER_RELATIVE_PATH } from './const/path.const'
+import { join } from 'path'
 
 @Injectable()
 export class CommonService {
@@ -174,5 +176,11 @@ export class CommonService {
     }
 
     return options
+  }
+
+  //이미지 업로드
+
+  uploadImage(file: Express.Multer.File) {
+    return join(TEMP_FOLDER_RELATIVE_PATH, file.filename)
   }
 }

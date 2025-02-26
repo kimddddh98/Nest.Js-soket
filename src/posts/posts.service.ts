@@ -1,33 +1,42 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { FindOptionsWhere, LessThan, MoreThan, Repository } from 'typeorm'
+import { QueryRunner, Repository } from 'typeorm'
 import { PostModel } from './entities/posts.entity'
 import { CreatePostDto } from './dto/create-post.dto'
 import { UpdatePostDto } from './dto/update-post.dto'
 import { PaginatePostDto } from './dto/paginate-post.dto'
-import { URL } from 'url'
 import { CommonService } from 'src/common/common.service'
-// export interface PostModel {
-//   id: number
-//   author: string
-//   title: string
-//   content: string
-//   likeCount: number
-//   commentCount: number
-// }
+import { promises } from 'fs'
+import { basename, join } from 'path'
+import {
+  POST_UPLOAD_FOLDER_PATH,
+  TEMP_FOLDER_PATH
+} from 'src/common/const/path.const'
+import { CreatePostImageDto } from './dto/image/create-post-image.dto'
+import { ImageModel } from 'src/common/entities/image.entity'
+import { DEFAULT_POST_FIND_OPTIONS } from './const/default-post-find-options.const'
 
 @Injectable()
 export class PostsService {
   constructor(
     @InjectRepository(PostModel)
     private readonly postReposittory: Repository<PostModel>,
-    private readonly commonService: CommonService
+    private readonly commonService: CommonService,
+    @InjectRepository(ImageModel)
+    private readonly imageRepository: Repository<ImageModel>
   ) {}
+
+  getRepository(qr?: QueryRunner) {
+    return qr ? qr.manager.getRepository(PostModel) : this.postReposittory
+  }
+
   async getAllPosts() {
     const posts = await this.postReposittory.find({
-      relations: {
-        author: true
-      }
+      ...DEFAULT_POST_FIND_OPTIONS
     })
     return posts
   }
@@ -37,9 +46,7 @@ export class PostsService {
       dto,
       this.postReposittory,
       {
-        relations: {
-          author: true
-        }
+        ...DEFAULT_POST_FIND_OPTIONS
       },
       'posts'
     )
@@ -80,10 +87,10 @@ export class PostsService {
   // }
   async getPostById(id: number) {
     const post = await this.postReposittory.findOne({
+      ...DEFAULT_POST_FIND_OPTIONS,
       where: {
         id
-      },
-      relations: ['author']
+      }
     })
     if (!post) {
       throw new NotFoundException()
@@ -91,17 +98,18 @@ export class PostsService {
     return post
   }
 
-  async createPost(authorId: number, postDto: CreatePostDto, image?: string) {
-    const post = this.postReposittory.create({
+  async createPost(authorId: number, postDto: CreatePostDto, qr?: QueryRunner) {
+    const repository = this.getRepository(qr)
+    const post = repository.create({
       author: {
         id: authorId
       },
       ...postDto,
-      image,
+      images: [],
       likeCount: 0,
       commentCount: 0
     })
-    const newPost = await this.postReposittory.save(post)
+    const newPost = await repository.save(post)
     return newPost
     // return post
   }
@@ -141,4 +149,25 @@ export class PostsService {
     await this.postReposittory.delete(id)
     return id
   }
+
+  // async createPostImage(dto: CreatePostImageDto) {
+  //   const tempFilePath = join(TEMP_FOLDER_PATH, dto.path)
+
+  //   try {
+  //     await promises.access(tempFilePath)
+  //   } catch (e) {
+  //     throw new BadRequestException('파일이 존재하지 않습니다.')
+  //   }
+
+  //   const fileName = basename(tempFilePath)
+
+  //   const newFilePath = join(POST_UPLOAD_FOLDER_PATH, fileName)
+
+  //   const result = await this.imageRepository.save({
+  //     ...dto
+  //   })
+  //   await promises.rename(tempFilePath, newFilePath)
+
+  //   return result
+  // }
 }

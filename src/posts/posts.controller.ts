@@ -3,14 +3,13 @@ import {
   Controller,
   Delete,
   Get,
+  InternalServerErrorException,
   Param,
   ParseIntPipe,
   Patch,
   Post,
   Query,
-  UploadedFile,
-  UseGuards,
-  UseInterceptors
+  UseGuards
 } from '@nestjs/common'
 import { PostsService } from './posts.service'
 import { AccessTokenGuard } from 'src/auth/guard/bearer-token.guard'
@@ -19,10 +18,16 @@ import { UsersModel } from 'src/users/entities/users.entity'
 import { CreatePostDto } from './dto/create-post.dto'
 import { UpdatePostDto } from './dto/update-post.dto'
 import { PaginatePostDto } from './dto/paginate-post.dto'
-import { FileInterceptor } from '@nestjs/platform-express'
+import { ImageType } from 'src/common/entities/image.entity'
+import { DataSource } from 'typeorm'
+import { PostsImagesService } from './images/posts-images.service'
 @Controller('posts')
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(
+    private readonly postsService: PostsService,
+    private readonly dataSource: DataSource,
+    private readonly postImagesService: PostsImagesService
+  ) {}
   @Get()
   // @UseGuards(AccessTokenGuard)
   getPosts(@Query() query: PaginatePostDto) {
@@ -40,16 +45,43 @@ export class PostsController {
     return this.postsService.createTestPost(user.id, body)
   }
 
+  // 글작성
   @Post()
   @UseGuards(AccessTokenGuard)
-  @UseInterceptors(FileInterceptor('image'))
-  postPost(
+  async postPost(
     @User() user: UsersModel,
-    @Body() createPostDto: CreatePostDto,
-    @UploadedFile() file?: Express.Multer.File
+    @Body() createPostDto: CreatePostDto
   ) {
-    const authorId = user.id
-    return this.postsService.createPost(authorId, createPostDto, file?.filename)
+    const qr = this.dataSource.createQueryRunner()
+    await qr.connect()
+
+    await qr.startTransaction()
+    try {
+      const userId = user.id
+      // 포스트 생성 / 저장
+      const post = await this.postsService.createPost(userId, createPostDto, qr)
+      // 이미지 생성 / 저장
+      for (let i = 0; i < createPostDto.images.length; i++) {
+        await this.postImagesService.createPostImage(
+          {
+            post,
+            order: i,
+            path: createPostDto.images[i],
+            type: ImageType.POST
+          },
+          qr
+        )
+      }
+      // 모든작업이 완료되면 커밋
+      await qr.commitTransaction()
+      await qr.release()
+      return this.postsService.getPostById(post.id)
+    } catch (e) {
+      // 에러 발생시 롤백 후 종료
+      await qr.rollbackTransaction()
+      await qr.release()
+      throw new InternalServerErrorException(e)
+    }
   }
   // postType: "SIMPLE_REVIEW",
   //       title: title.value.length > 0 ? title.value : null,

@@ -15,10 +15,8 @@ import { RoomsModel } from './rooms/entities/rooms.entity'
 import { BookmarkModule } from './bookmark/bookmark.module'
 import { BookmarkModel } from './bookmark/entities/bookmark.entity'
 import { ConfigModule } from '@nestjs/config'
-import {
-  PUBLIC_FOLDER_NAME,
-  PUBLIC_FOLDER_PATH
-} from './common/const/path.const'
+import { PUBLIC_FOLDER_NAME } from './common/const/path.const'
+import { ImageModel } from './common/entities/image.entity'
 @Module({
   imports: [
     PostsModule,
@@ -33,7 +31,7 @@ import {
       username: process.env.POSTGRES_USERNAME,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DATABASE,
-      entities: [PostModel, UsersModel, RoomsModel, BookmarkModel],
+      entities: [PostModel, UsersModel, RoomsModel, BookmarkModel, ImageModel],
       synchronize: true
     }),
     UsersModule,
