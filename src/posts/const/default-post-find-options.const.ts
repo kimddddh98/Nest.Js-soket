@@ -6,7 +6,4 @@ export const DEFAULT_POST_FIND_OPTIONS: FindManyOptions<PostModel> = {
     author: true,
     images: true
   }
-  // order: {
-  //   createdAt: 'DESC'
-  // }
 }

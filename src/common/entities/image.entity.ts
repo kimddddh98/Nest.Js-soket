@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToOne } from 'typeorm'
 import { BaseModel } from './base.entity'
-import { IsEnum, IsIn, IsInt, IsOptional, IsString } from 'class-validator'
+import { IsEnum, IsInt, IsOptional, IsString } from 'class-validator'
 import { Transform } from 'class-transformer'
 import { POST_UPLOAD_FOLDER_RELATIVE_PATH } from '../const/path.const'
 import { join } from 'path'
