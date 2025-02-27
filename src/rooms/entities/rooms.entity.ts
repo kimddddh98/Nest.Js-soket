@@ -1,14 +1,7 @@
 import { BookmarkModel } from 'src/bookmark/entities/bookmark.entity'
 import { BaseModel } from 'src/common/entities/base.entity'
 import { UsersModel } from 'src/users/entities/users.entity'
-import {
-  BeforeInsert,
-  Column,
-  Entity,
-  ManyToMany,
-  ManyToOne,
-  OneToMany
-} from 'typeorm'
+import { Column, Entity, ManyToMany, ManyToOne, OneToMany } from 'typeorm'
 
 @Entity()
 export class RoomsModel extends BaseModel {
