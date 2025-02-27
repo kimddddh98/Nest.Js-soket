@@ -9,8 +9,7 @@ import {
   Patch,
   Post,
   Query,
-  Req,
-  Request,
+  UseFilters,
   UseGuards,
   UseInterceptors
 } from '@nestjs/common'
@@ -27,6 +26,7 @@ import { PostsImagesService } from './images/posts-images.service'
 import { LogInterceptor } from 'src/common/interceptor/log.interceptor'
 import { TransactionInterceptor } from 'src/common/interceptor/transaction.interceptor'
 import { QR } from 'src/common/decorator/query-runner.decorator'
+import { HttpExceptionFilter } from 'src/common/exception-filter/http.exception.filter'
 @Controller('posts')
 export class PostsController {
   constructor(
@@ -37,6 +37,7 @@ export class PostsController {
   @Get()
   // @UseGuards(AccessTokenGuard)
   @UseInterceptors(LogInterceptor)
+  @UseFilters(HttpExceptionFilter)
   getPosts(@Query() query: PaginatePostDto) {
     return this.postsService.pagenatePosts(query)
   }

@@ -26,7 +26,7 @@ export class LogInterceptor implements NestInterceptor {
     console.log(`[Request] {${method}} {${path}} {${now.toLocaleString('kr')}}`)
 
     return next.handle().pipe(
-      tap(observerOrNext =>
+      tap(() =>
         console.log(
           `[Response] {${method}} {${path}} {${now.toLocaleString('kr')}} {${
             new Date().getMilliseconds() - now.getMilliseconds()
