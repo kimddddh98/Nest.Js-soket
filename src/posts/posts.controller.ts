@@ -9,6 +9,8 @@ import {
   Patch,
   Post,
   Query,
+  Req,
+  Request,
   UseGuards,
   UseInterceptors
 } from '@nestjs/common'
@@ -20,9 +22,11 @@ import { CreatePostDto } from './dto/create-post.dto'
 import { UpdatePostDto } from './dto/update-post.dto'
 import { PaginatePostDto } from './dto/paginate-post.dto'
 import { ImageType } from 'src/common/entities/image.entity'
-import { DataSource } from 'typeorm'
+import { DataSource, QueryRunner } from 'typeorm'
 import { PostsImagesService } from './images/posts-images.service'
 import { LogInterceptor } from 'src/common/interceptor/log.interceptor'
+import { TransactionInterceptor } from 'src/common/interceptor/transaction.interceptor'
+import { QR } from 'src/common/decorator/query-runner.decorator'
 @Controller('posts')
 export class PostsController {
   constructor(
@@ -51,63 +55,35 @@ export class PostsController {
   // 글작성
   @Post()
   @UseGuards(AccessTokenGuard)
+  @UseInterceptors(TransactionInterceptor)
   async postPost(
     @User() user: UsersModel,
-    @Body() createPostDto: CreatePostDto
+    @Body() createPostDto: CreatePostDto,
+    @QR() qr: QueryRunner
   ) {
-    const qr = this.dataSource.createQueryRunner()
-    await qr.connect()
+    const userId = user.id
 
-    await qr.startTransaction()
-    try {
-      const userId = user.id
-      // 포스트 생성 / 저장
-      const post = await this.postsService.createPost(userId, createPostDto, qr)
-      // 이미지 생성 / 저장
-      for (let i = 0; i < createPostDto.images.length; i++) {
-        await this.postImagesService.createPostImage(
-          {
-            post,
-            order: i,
-            path: createPostDto.images[i],
-            type: ImageType.POST
-          },
-          qr
-        )
-      }
-      // 모든작업이 완료되면 커밋
-      await qr.commitTransaction()
-      await qr.release()
-      return this.postsService.getPostById(post.id)
-    } catch (e) {
-      // 에러 발생시 롤백 후 종료
-      await qr.rollbackTransaction()
-      await qr.release()
-      throw new InternalServerErrorException(e)
+    // 포스트 생성 / 저장
+    const post = await this.postsService.createPost(userId, createPostDto, qr)
+
+    // 이미지 생성 / 저장
+    for (let i = 0; i < createPostDto.images.length; i++) {
+      /**
+       * @TODO
+       * 만약 이미지를 루핑하다 성공한 이미지와 실패한 이미지가있다면 어떻게 처리할것인가?
+       */
+      await this.postImagesService.createPostImage(
+        {
+          post,
+          order: i,
+          path: createPostDto.images[i],
+          type: ImageType.POST
+        },
+        qr
+      )
     }
-  }
-  // postType: "SIMPLE_REVIEW",
-  //       title: title.value.length > 0 ? title.value : null,
-  //       content: reviewTxt.value,
-  //       userID: "195370793",
-  //       rate: rateValue,
-  @Post('simple-write')
-  postSimple(
-    @Body('postType') postType: string,
-    @Body('title') title: string | null,
-    @Body('content') content: string,
-    @Body('userId') userId: string,
-    @Body('rate') rate: number,
-    @Body('isPrivate') isPrivate: boolean
-  ) {
-    console.log(postType)
-    console.log(title)
-    console.log(content)
-    console.log(userId)
-    console.log(rate)
-    console.log(isPrivate)
-    return { d: '성공' }
-    // return this.postsService.createPost(authorId, title, content)
+    // 모든작업이 완료되면 커밋
+    return this.postsService.getPostById(post.id, qr)
   }
 
   // @Post('image')
