@@ -4,7 +4,7 @@ import { ImageModel } from 'src/common/entities/image.entity'
 import { lengthMessage } from 'src/common/validation-message/length.message'
 import { stringMessage } from 'src/common/validation-message/string.message'
 import { UsersModel } from 'src/users/entities/users.entity'
-import { BeforeInsert, Column, Entity, JoinColumn, OneToOne } from 'typeorm'
+import { Column, Entity, JoinColumn, OneToOne } from 'typeorm'
 
 export enum ProfilePublicType {
   PUBLIC = 'PUBLIC',

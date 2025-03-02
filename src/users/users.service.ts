@@ -6,7 +6,10 @@ import {
 import { InjectRepository } from '@nestjs/typeorm'
 import { UsersModel } from './entities/users.entity'
 import { Repository } from 'typeorm'
-import { ProfileModel } from 'src/profile/entities/profile.entity'
+import {
+  ProfileModel,
+  ProfilePublicType
+} from 'src/profile/entities/profile.entity'
 import { RegisterUserDto } from 'src/auth/dto/register-user.dto'
 
 @Injectable()
@@ -50,7 +53,13 @@ export class UsersService {
 
   // 조회
   async getUsers() {
-    const users = await this.userReposittory.find()
+    const users = await this.userReposittory.find({
+      where: {
+        profile: {
+          publicType: ProfilePublicType.PUBLIC
+        }
+      }
+    })
     return users
   }
   async findUserEmail(email: string) {
