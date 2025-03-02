@@ -13,6 +13,7 @@ export class UsersController {
   }
 
   @Get('/:id')
+  @UseGuards(AccessTokenGuard)
   getUser(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.getUser(id)
   }
