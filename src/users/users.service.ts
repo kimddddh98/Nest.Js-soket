@@ -37,22 +37,15 @@ export class UsersService {
       throw new BadRequestException('이미 가입한 이메일입니다.')
     }
 
-    const user = this.userReposittory.create({
+    const user = this.userReposittory.save({
       email,
-      password
-    })
-
-    const profile = new ProfileModel()
-    profile.nickname = nickname
-    user.profile = profile
-
-    await this.userReposittory.save(user)
-
-    return await this.userReposittory.findOne({
-      where: {
-        id: user.id
+      password,
+      profile: {
+        nickname
       }
     })
+
+    return user
   }
 
   // 조회
