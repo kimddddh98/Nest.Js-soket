@@ -9,14 +9,17 @@ import {
 import { RolesEnum } from '../const/roles.const'
 import { PostModel } from 'src/posts/entities/posts.entity'
 import { BaseModel } from 'src/common/entities/base.entity'
-import { IsString, Length, IsEmail } from 'class-validator'
+import { IsString, Length, IsEmail, IsEnum } from 'class-validator'
 import { lengthMessage } from 'src/common/validation-message/length.message'
 import { stringMessage } from 'src/common/validation-message/string.message'
 import { emailMessage } from 'src/common/validation-message/email.message'
-import { Exclude, Expose } from 'class-transformer'
+import { Exclude, Expose, Transform } from 'class-transformer'
 import { RoomsModel } from 'src/rooms/entities/rooms.entity'
 import { BookmarkModel } from 'src/bookmark/entities/bookmark.entity'
-import { ProfileModel } from 'src/profile/entities/profile.entity'
+import {
+  ProfileModel,
+  ProfilePublicType
+} from 'src/profile/entities/profile.entity'
 @Entity()
 export class UsersModel extends BaseModel {
   // 중복안됨 , 20자 이하
@@ -64,16 +67,25 @@ export class UsersModel extends BaseModel {
   @OneToMany(() => BookmarkModel, bookmark => bookmark.user)
   bookmarks: BookmarkModel[]
 
-  // @Column({
-  //   nullable: true
-  // })
-  // @Expose()
-  // profileImageUrl: string
+  @Exclude()
   @OneToOne(() => ProfileModel, profile => profile.user, {
     cascade: true,
     eager: true
   })
   profile: ProfileModel
+
+  @Expose()
+  @Transform(({ obj }) => obj.profile?.nickname)
+  nickname: string
+
+  @Expose()
+  @Transform(({ obj }) => obj.profile?.profileImg)
+  profileImg: string
+
+  @Expose() //
+  @Transform(({ obj }) => obj.profile?.publicType)
+  @IsEnum(ProfilePublicType)
+  publicType: ProfilePublicType
 
   //내가 속한 방들
   @Expose()
