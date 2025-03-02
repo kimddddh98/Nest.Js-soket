@@ -6,20 +6,20 @@ import {
 import { InjectRepository } from '@nestjs/typeorm'
 import { UsersModel } from './entities/users.entity'
 import { Repository } from 'typeorm'
+import { ProfileModel } from 'src/profile/entities/profile.entity'
+import { RegisterUserDto } from 'src/auth/dto/register-user.dto'
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(UsersModel)
-    private readonly userReposittory: Repository<UsersModel>
+    private readonly userReposittory: Repository<UsersModel>,
+    @InjectRepository(ProfileModel)
+    private readonly profileRepository: Repository<ProfileModel>
   ) {}
   // 생성
-  async createUser({
-    email,
-    nickname,
-    password
-  }: Pick<UsersModel, 'email' | 'nickname' | 'password'>) {
-    const checkNickname = await this.userReposittory.exist({
+  async createUser({ email, nickname, password }: RegisterUserDto) {
+    const checkNickname = await this.profileRepository.exist({
       where: {
         nickname
       }
@@ -38,13 +38,21 @@ export class UsersService {
     }
 
     const user = this.userReposittory.create({
-      nickname,
       email,
       password
     })
 
-    const newUser = await this.userReposittory.save(user)
-    return newUser
+    const profile = new ProfileModel()
+    profile.nickname = nickname
+    user.profile = profile
+
+    await this.userReposittory.save(user)
+
+    return await this.userReposittory.findOne({
+      where: {
+        id: user.id
+      }
+    })
   }
 
   // 조회

@@ -1,10 +1,11 @@
-import { Column, Entity, ManyToOne } from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm'
 import { BaseModel } from './base.entity'
 import { IsEnum, IsInt, IsOptional, IsString } from 'class-validator'
 import { Transform } from 'class-transformer'
 import { POST_UPLOAD_FOLDER_RELATIVE_PATH } from '../const/path.const'
 import { join } from 'path'
 import { PostModel } from 'src/posts/entities/posts.entity'
+import { ProfileModel } from 'src/profile/entities/profile.entity'
 
 export enum ImageType {
   POST = 'POST',
@@ -37,6 +38,10 @@ export class ImageModel extends BaseModel {
   })
   path: string
 
-  @ManyToOne(type => PostModel, post => post.images)
+  @ManyToOne(() => PostModel, post => post.images)
   post: PostModel
+
+  @OneToOne(() => ProfileModel, profile => profile.profileImg)
+  @JoinColumn()
+  profile: ProfileModel
 }

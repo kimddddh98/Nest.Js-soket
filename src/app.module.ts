@@ -17,6 +17,8 @@ import { BookmarkModel } from './bookmark/entities/bookmark.entity'
 import { ConfigModule } from '@nestjs/config'
 import { PUBLIC_FOLDER_NAME } from './common/const/path.const'
 import { ImageModel } from './common/entities/image.entity'
+import { ProfileModule } from './profile/profile.module'
+import { ProfileModel } from './profile/entities/profile.entity'
 @Module({
   imports: [
     PostsModule,
@@ -31,7 +33,14 @@ import { ImageModel } from './common/entities/image.entity'
       username: process.env.POSTGRES_USERNAME,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DATABASE,
-      entities: [PostModel, UsersModel, RoomsModel, BookmarkModel, ImageModel],
+      entities: [
+        PostModel,
+        UsersModel,
+        RoomsModel,
+        BookmarkModel,
+        ImageModel,
+        ProfileModel
+      ],
       synchronize: true
     }),
     UsersModule,
@@ -46,7 +55,8 @@ import { ImageModel } from './common/entities/image.entity'
       serveRoot: '/public'
     }),
     RoomsModule,
-    BookmarkModule
+    BookmarkModule,
+    ProfileModule
   ],
   controllers: [AppController],
   providers: [

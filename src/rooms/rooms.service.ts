@@ -25,7 +25,7 @@ export class RoomsService {
   ) {}
   async create(user: UsersModel, createRoomDto: CreateRoomDto) {
     const createRoom = this.roomsRepository.create({
-      roomName: createRoomDto.roomName ?? user.nickname,
+      roomName: createRoomDto.roomName ?? user.profile.nickname,
       createUser: user,
       userList: [user]
     })

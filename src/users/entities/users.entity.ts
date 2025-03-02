@@ -1,4 +1,11 @@
-import { Entity, Column, OneToMany, ManyToMany, JoinTable } from 'typeorm'
+import {
+  Entity,
+  Column,
+  OneToMany,
+  ManyToMany,
+  JoinTable,
+  OneToOne
+} from 'typeorm'
 import { RolesEnum } from '../const/roles.const'
 import { PostModel } from 'src/posts/entities/posts.entity'
 import { BaseModel } from 'src/common/entities/base.entity'
@@ -9,22 +16,10 @@ import { emailMessage } from 'src/common/validation-message/email.message'
 import { Exclude, Expose } from 'class-transformer'
 import { RoomsModel } from 'src/rooms/entities/rooms.entity'
 import { BookmarkModel } from 'src/bookmark/entities/bookmark.entity'
+import { ProfileModel } from 'src/profile/entities/profile.entity'
 @Entity()
-@Exclude()
 export class UsersModel extends BaseModel {
   // 중복안됨 , 20자 이하
-  @Column({
-    length: 20,
-    unique: true
-  })
-  @IsString({
-    message: stringMessage
-  })
-  @Length(1, 20, {
-    message: lengthMessage
-  })
-  @Expose()
-  nickname: string
 
   // 중복안됨
   @Column({
@@ -69,11 +64,16 @@ export class UsersModel extends BaseModel {
   @OneToMany(() => BookmarkModel, bookmark => bookmark.user)
   bookmarks: BookmarkModel[]
 
-  @Column({
-    nullable: true
+  // @Column({
+  //   nullable: true
+  // })
+  // @Expose()
+  // profileImageUrl: string
+  @OneToOne(() => ProfileModel, profile => profile.user, {
+    cascade: true,
+    eager: true
   })
-  @Expose()
-  profileImageUrl: string
+  profile: ProfileModel
 
   //내가 속한 방들
   @Expose()
