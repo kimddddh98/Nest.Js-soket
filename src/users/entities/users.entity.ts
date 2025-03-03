@@ -79,7 +79,7 @@ export class UsersModel extends BaseModel {
   nickname: string
 
   @Expose()
-  @Transform(({ obj }) => obj.profile?.profileImg)
+  @Transform(({ obj }) => obj.profile?.profileImg?.path)
   profileImg: string
 
   @Expose() //

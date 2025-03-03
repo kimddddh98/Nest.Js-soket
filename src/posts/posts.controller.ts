@@ -83,7 +83,6 @@ export class PostsController {
         qr
       )
     }
-    // 모든작업이 완료되면 커밋
     return this.postsService.getPostById(post.id, qr)
   }
 
