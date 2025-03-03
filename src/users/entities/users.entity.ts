@@ -20,6 +20,9 @@ import {
   ProfileModel,
   ProfilePublicType
 } from 'src/profile/entities/profile.entity'
+import { ImageType } from 'src/common/entities/image.entity'
+import { join } from 'path'
+import { PROFILE_UPLOAD_FOLDER_RELATIVE_PATH } from 'src/common/const/path.const'
 @Entity()
 export class UsersModel extends BaseModel {
   // 중복안됨 , 20자 이하
@@ -79,7 +82,14 @@ export class UsersModel extends BaseModel {
   nickname: string
 
   @Expose()
-  @Transform(({ obj }) => obj.profile?.profileImg?.path)
+  @Transform(({ obj }) => {
+    if (obj.profile?.profileImg?.type === ImageType.PROFILE) {
+      return `/${join(
+        PROFILE_UPLOAD_FOLDER_RELATIVE_PATH,
+        obj.profile?.profileImg?.path
+      )}`
+    }
+  })
   profileImg: string
 
   @Expose() //
