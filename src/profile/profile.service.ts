@@ -22,14 +22,6 @@ export class ProfileService {
   ) {
     console.log('qr', !!qr)
     const repository = this.getRepository(qr)
-    const isExist = await repository.exist({
-      where: {
-        nickname: dto.nickname
-      }
-    })
-    if (isExist) {
-      throw new BadRequestException('이미 존재하는 닉네임입니다.')
-    }
 
     const profile = await repository.findOne({
       where: {
@@ -41,7 +33,19 @@ export class ProfileService {
     if (!profile) {
       throw new BadRequestException('프로필이 존재하지 않습니다.')
     }
+    if (profile.nickname !== dto.nickname) {
+      const isExist = await repository.exist({
+        where: {
+          nickname: dto.nickname
+        }
+      })
+      if (isExist) {
+        throw new BadRequestException('이미 존재하는 닉네임입니다.')
+      }
+    }
+
     profile.nickname = dto.nickname
+    profile.publicType = dto.publicType
     const newProfile = await repository.save(profile)
 
     return newProfile
