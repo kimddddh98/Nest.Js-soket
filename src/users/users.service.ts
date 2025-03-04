@@ -52,13 +52,18 @@ export class UsersService {
   }
 
   // 조회
-  async getUsers() {
+  async getUsers(userId: number) {
     const users = await this.userReposittory.find({
-      where: {
-        profile: {
-          publicType: ProfilePublicType.PUBLIC
+      where: [
+        {
+          profile: {
+            publicType: ProfilePublicType.PUBLIC
+          }
+        },
+        {
+          id: userId
         }
-      }
+      ]
     })
     return users
   }
