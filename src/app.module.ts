@@ -19,6 +19,7 @@ import { PUBLIC_FOLDER_NAME } from './common/const/path.const'
 import { ImageModel } from './common/entities/image.entity'
 import { ProfileModule } from './profile/profile.module'
 import { ProfileModel } from './profile/entities/profile.entity'
+import { ChatsModule } from './chats/chats.module';
 @Module({
   imports: [
     PostsModule,
@@ -56,7 +57,8 @@ import { ProfileModel } from './profile/entities/profile.entity'
     }),
     RoomsModule,
     BookmarkModule,
-    ProfileModule
+    ProfileModule,
+    ChatsModule
   ],
   controllers: [AppController],
   providers: [
