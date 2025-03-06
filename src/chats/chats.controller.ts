@@ -1,5 +1,5 @@
-import { Controller } from '@nestjs/common';
-import { ChatsService } from './chats.service';
+import { Controller } from '@nestjs/common'
+import { ChatsService } from './chats.service'
 
 @Controller('chats')
 export class ChatsController {
