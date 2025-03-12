@@ -19,7 +19,8 @@ import { PUBLIC_FOLDER_NAME } from './common/const/path.const'
 import { ImageModel } from './common/entities/image.entity'
 import { ProfileModule } from './profile/profile.module'
 import { ProfileModel } from './profile/entities/profile.entity'
-import { ChatsModule } from './chats/chats.module';
+import { ChatsModule } from './chats/chats.module'
+import { MessagesModel } from './chats/entities/messages.entity'
 @Module({
   imports: [
     PostsModule,
@@ -40,7 +41,8 @@ import { ChatsModule } from './chats/chats.module';
         RoomsModel,
         BookmarkModel,
         ImageModel,
-        ProfileModel
+        ProfileModel,
+        MessagesModel
       ],
       synchronize: true
     }),

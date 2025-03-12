@@ -1,4 +1,5 @@
 import { BookmarkModel } from 'src/bookmark/entities/bookmark.entity'
+import { MessagesModel } from 'src/chats/entities/messages.entity'
 import { BaseModel } from 'src/common/entities/base.entity'
 import { UsersModel } from 'src/users/entities/users.entity'
 import { Column, Entity, ManyToMany, OneToMany } from 'typeorm'
@@ -22,4 +23,7 @@ export class RoomsModel extends BaseModel {
     onDelete: 'CASCADE'
   })
   userList: UsersModel[]
+
+  @OneToMany(() => MessagesModel, messages => messages.room)
+  messages: MessagesModel
 }

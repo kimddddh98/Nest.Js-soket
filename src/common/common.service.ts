@@ -12,7 +12,6 @@ import { ConfigService } from '@nestjs/config'
 import { envKeys } from './const/env-keys.const'
 import { TEMP_FOLDER_RELATIVE_PATH } from './const/path.const'
 import { join } from 'path'
-import { FileInterceptor } from '@nestjs/platform-express'
 
 @Injectable()
 export class CommonService {

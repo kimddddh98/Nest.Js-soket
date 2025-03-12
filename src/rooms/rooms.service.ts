@@ -44,7 +44,8 @@ export class RoomsService {
       this.roomsRepository,
       {
         relations: {
-          bookmarks: true
+          bookmarks: true,
+          userList: true
         }
       },
       'rooms'
@@ -89,6 +90,15 @@ export class RoomsService {
       ...rest,
       isBookmarked
     }
+  }
+
+  async checkExistsRoom(roomId: number) {
+    const exists = await this.roomsRepository.exists({
+      where: {
+        id: roomId
+      }
+    })
+    return exists
   }
 
   update(id: number, updateRoomDto: UpdateRoomDto) {

@@ -23,6 +23,7 @@ import {
 import { ImageType } from 'src/common/entities/image.entity'
 import { join } from 'path'
 import { PROFILE_UPLOAD_FOLDER_RELATIVE_PATH } from 'src/common/const/path.const'
+import { MessagesModel } from 'src/chats/entities/messages.entity'
 @Entity()
 export class UsersModel extends BaseModel {
   // 중복안됨 , 20자 이하
@@ -102,4 +103,7 @@ export class UsersModel extends BaseModel {
   @ManyToMany(() => RoomsModel, room => room.userList)
   @JoinTable()
   rooms: RoomsModel[]
+
+  @OneToMany(() => MessagesModel, message => message.user)
+  messages: MessagesModel
 }
