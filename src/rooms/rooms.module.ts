@@ -7,11 +7,13 @@ import { UsersModule } from 'src/users/users.module'
 import { AuthModule } from 'src/auth/auth.module'
 import { BookmarkModel } from 'src/bookmark/entities/bookmark.entity'
 import { UsersModel } from 'src/users/entities/users.entity'
+import { CommonModule } from 'src/common/common.module'
 @Module({
   imports: [
     TypeOrmModule.forFeature([RoomsModel, BookmarkModel, UsersModel]),
     UsersModule,
-    AuthModule
+    AuthModule,
+    CommonModule
   ],
   controllers: [RoomsController],
   providers: [RoomsService],

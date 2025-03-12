@@ -7,7 +7,8 @@ import {
   Param,
   Delete,
   UseGuards,
-  ParseIntPipe
+  ParseIntPipe,
+  Query
 } from '@nestjs/common'
 import { RoomsService } from './rooms.service'
 import { CreateRoomDto } from './dto/create-room.dto'
@@ -16,6 +17,7 @@ import { AccessTokenGuard } from 'src/auth/guard/bearer-token.guard'
 import { User } from 'src/users/decorator/user.decorator'
 import { UsersModel } from 'src/users/entities/users.entity'
 import { InviteRoomDto } from './dto/invite-room.dto'
+import { RoomsPaginationDto } from './dto/rooms-pagination.dto'
 
 @Controller('rooms')
 export class RoomsController {
@@ -31,8 +33,8 @@ export class RoomsController {
   // 채팅방 목록 조회
   @Get()
   @UseGuards(AccessTokenGuard)
-  findAllRooms(@User() user: UsersModel) {
-    return this.roomsService.findAllRoom(user)
+  findAllRooms(@User() user: UsersModel, @Query() dto: RoomsPaginationDto) {
+    return this.roomsService.findAllRoom(user, dto)
   }
 
   @Get(':id')

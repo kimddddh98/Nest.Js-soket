@@ -11,6 +11,8 @@ import { RoomsModel } from './entities/rooms.entity'
 import { Repository } from 'typeorm'
 import { BookmarkModel } from 'src/bookmark/entities/bookmark.entity'
 import { InviteRoomDto } from './dto/invite-room.dto'
+import { CommonService } from 'src/common/common.service'
+import { RoomsPaginationDto } from './dto/rooms-pagination.dto'
 
 @Injectable()
 export class RoomsService {
@@ -20,8 +22,11 @@ export class RoomsService {
     @InjectRepository(BookmarkModel)
     private readonly bookmarkRepository: Repository<BookmarkModel>,
     @InjectRepository(UsersModel)
-    private readonly usersRepository: Repository<UsersModel>
+    private readonly usersRepository: Repository<UsersModel>,
+    private readonly commonService: CommonService
   ) {}
+
+  /** 채팅방 생성 */
   async create(createRoomDto: CreateRoomDto) {
     const createRoom = this.roomsRepository.create({
       roomName: createRoomDto.roomName ?? createRoomDto.userIds.join(','),
@@ -32,6 +37,20 @@ export class RoomsService {
     return saveRoom
   }
 
+  /** 채팅방 조회 */
+  paginateRooms(dto: RoomsPaginationDto) {
+    return this.commonService.paginate(
+      dto,
+      this.roomsRepository,
+      {
+        relations: {
+          bookmarks: true
+        }
+      },
+      'rooms'
+    )
+  }
+
   checkingBookMark = (bookmarks: BookmarkModel[], user: UsersModel) => {
     const isBookmarked = bookmarks?.some(
       bookmark => bookmark?.user.id === user.id
@@ -39,22 +58,13 @@ export class RoomsService {
     return isBookmarked
   }
 
-  async findAllRoom(user: UsersModel) {
-    const rooms = await this.roomsRepository.find({
-      where: {
-        userList: {
-          id: user.id
-        }
-      },
-      relations: {
-        userList: true,
-        bookmarks: true
-      }
-    })
-    const bookmarkRooms = rooms.map(({ bookmarks, ...room }) => ({
+  async findAllRoom(user: UsersModel, dto: RoomsPaginationDto) {
+    const rooms = await this.paginateRooms(dto)
+    const bookmarkRooms = rooms.data.map(({ bookmarks, ...room }) => ({
       ...room,
       isBookmarked: this.checkingBookMark(bookmarks, user)
     }))
+
     return bookmarkRooms
   }
 
