@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ForbiddenException,
   Injectable,
   NotFoundException
 } from '@nestjs/common'
@@ -23,11 +22,10 @@ export class RoomsService {
     @InjectRepository(UsersModel)
     private readonly usersRepository: Repository<UsersModel>
   ) {}
-  async create(user: UsersModel, createRoomDto: CreateRoomDto) {
+  async create(createRoomDto: CreateRoomDto) {
     const createRoom = this.roomsRepository.create({
-      roomName: createRoomDto.roomName ?? user.profile.nickname,
-      createUser: user,
-      userList: [user]
+      roomName: createRoomDto.roomName ?? createRoomDto.userIds.join(','),
+      userList: createRoomDto.userIds.map(id => ({ id }))
     })
     const saveRoom = await this.roomsRepository.save(createRoom)
 
@@ -50,9 +48,7 @@ export class RoomsService {
       },
       relations: {
         userList: true,
-        bookmarks: {
-          user: true
-        }
+        bookmarks: true
       }
     })
     const bookmarkRooms = rooms.map(({ bookmarks, ...room }) => ({
@@ -68,7 +64,6 @@ export class RoomsService {
         id
       },
       relations: {
-        createUser: true,
         userList: true,
         bookmarks: {
           user: true
@@ -94,18 +89,15 @@ export class RoomsService {
     const room = await this.roomsRepository.findOne({
       where: {
         id
-      },
-      relations: {
-        createUser: true
       }
     })
 
     if (!room) {
       throw new NotFoundException('채팅방이 존재하지 않습니다.')
     }
-    if (room.createUser.id !== user.id) {
-      throw new ForbiddenException('삭제 권한이 없습니다.')
-    }
+    // if (room.createUser.id !== user.id) {
+    //   throw new ForbiddenException('삭제 권한이 없습니다.')
+    // }
 
     const deleteRoom = await this.roomsRepository.delete(id)
     if (deleteRoom.affected === 0) {
@@ -120,11 +112,9 @@ export class RoomsService {
   async bookmark(user: UsersModel, id: number) {
     const room = await this.roomsRepository.findOne({
       where: {
-        id,
-        createUser: {
-          id: user.id
-        }
+        id
       },
+
       relations: {
         bookmarks: {
           user: true

@@ -25,7 +25,7 @@ export class RoomsController {
   @Post()
   @UseGuards(AccessTokenGuard)
   create(@User() user: UsersModel, @Body() createRoomDto: CreateRoomDto) {
-    return this.roomsService.create(user, createRoomDto)
+    return this.roomsService.create(createRoomDto)
   }
 
   // 채팅방 목록 조회

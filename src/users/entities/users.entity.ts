@@ -62,9 +62,9 @@ export class UsersModel extends BaseModel {
   @OneToMany(() => PostModel, post => post.author)
   posts: PostModel[]
 
-  @Expose()
-  @OneToMany(() => RoomsModel, room => room.createUser)
-  rooms: RoomsModel[]
+  // @Expose()
+  // @OneToMany(() => RoomsModel, room => room.createUser)
+  // rooms: RoomsModel[]
 
   @Expose()
   @OneToMany(() => BookmarkModel, bookmark => bookmark.user)
@@ -101,5 +101,5 @@ export class UsersModel extends BaseModel {
   @Expose()
   @ManyToMany(() => RoomsModel, room => room.userList)
   @JoinTable()
-  myRooms: RoomsModel[]
+  rooms: RoomsModel[]
 }

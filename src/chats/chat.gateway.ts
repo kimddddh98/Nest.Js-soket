@@ -7,6 +7,9 @@ import {
   WebSocketServer
 } from '@nestjs/websockets'
 import { Server, Socket } from 'socket.io'
+import { CreateRoomDto } from 'src/rooms/dto/create-room.dto'
+import { RoomsService } from 'src/rooms/rooms.service'
+import { ChatsService } from './chats.service'
 
 @WebSocketGateway({
   /**
@@ -17,12 +20,24 @@ import { Server, Socket } from 'socket.io'
   namespace: 'chats'
 })
 export class ChatGateway implements OnGatewayConnection {
+  constructor(
+    private readonly chatService: ChatsService,
+    private readonly roomsService: RoomsService
+  ) {}
   @WebSocketServer()
   server: Server
 
   handleConnection(soket: Socket) {
     console.log('connection', soket.id)
     return soket.id
+  }
+
+  @SubscribeMessage('create_room')
+  async createRoom(
+    @MessageBody() data: CreateRoomDto,
+    @ConnectedSocket() soket: Socket
+  ) {
+    const rooms = await this.roomsService.create(data)
   }
 
   /**

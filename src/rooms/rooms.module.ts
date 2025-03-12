@@ -14,6 +14,7 @@ import { UsersModel } from 'src/users/entities/users.entity'
     AuthModule
   ],
   controllers: [RoomsController],
-  providers: [RoomsService]
+  providers: [RoomsService],
+  exports: [RoomsService]
 })
 export class RoomsModule {}

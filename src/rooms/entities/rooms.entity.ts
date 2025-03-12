@@ -1,14 +1,14 @@
 import { BookmarkModel } from 'src/bookmark/entities/bookmark.entity'
 import { BaseModel } from 'src/common/entities/base.entity'
 import { UsersModel } from 'src/users/entities/users.entity'
-import { Column, Entity, ManyToMany, ManyToOne, OneToMany } from 'typeorm'
+import { Column, Entity, ManyToMany, OneToMany } from 'typeorm'
 
 @Entity()
 export class RoomsModel extends BaseModel {
-  @ManyToOne(() => UsersModel, user => user.rooms, {
-    nullable: false
-  })
-  createUser: UsersModel
+  // @ManyToOne(() => UsersModel, user => user.rooms, {
+  //   nullable: false
+  // })
+  // createUser: UsersModel
 
   @OneToMany(() => BookmarkModel, bookmark => bookmark.room)
   bookmarks: BookmarkModel[]
@@ -18,7 +18,7 @@ export class RoomsModel extends BaseModel {
   })
   roomName: string
 
-  @ManyToMany(() => UsersModel, user => user.myRooms, {
+  @ManyToMany(() => UsersModel, user => user.rooms, {
     onDelete: 'CASCADE'
   })
   userList: UsersModel[]
