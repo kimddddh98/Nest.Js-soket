@@ -12,7 +12,6 @@ import { CreateRoomDto } from 'src/rooms/dto/create-room.dto'
 import { RoomsService } from 'src/rooms/rooms.service'
 import { ChatsService } from './chats.service'
 import { EnterRoomDto } from './dto/enter-room.dto'
-import { join } from 'path'
 import { CreateMessageDto } from './messages/dto/create-message.dto'
 import { MessagesService } from './messages/messages.service'
 

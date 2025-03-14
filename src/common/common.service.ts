@@ -70,7 +70,11 @@ export class CommonService {
 
     const result = await repository.find({
       ...findOptions,
-      ...overrideFindOptions
+      ...overrideFindOptions,
+      where: {
+        ...findOptions.where,
+        ...overrideFindOptions?.where
+      }
     })
 
     const lastPost =

@@ -8,7 +8,7 @@ import { UpdateRoomDto } from './dto/update-room.dto'
 import { UsersModel } from 'src/users/entities/users.entity'
 import { InjectRepository } from '@nestjs/typeorm'
 import { RoomsModel } from './entities/rooms.entity'
-import { Repository } from 'typeorm'
+import { FindManyOptions, Repository } from 'typeorm'
 import { BookmarkModel } from 'src/bookmark/entities/bookmark.entity'
 import { InviteRoomDto } from './dto/invite-room.dto'
 import { CommonService } from 'src/common/common.service'
@@ -28,8 +28,25 @@ export class RoomsService {
 
   /** 채팅방 생성 */
   async create(createRoomDto: CreateRoomDto) {
+    const { roomName, userIds } = createRoomDto
+    const userNames: string[] = []
+    for (const userId of userIds) {
+      const user = await this.usersRepository.findOne({
+        where: {
+          id: userId
+        },
+        relations: {
+          profile: true
+        }
+      })
+      if (!user) {
+        throw new NotFoundException(`유저가 존재하지않습니다. id : ${userId}`)
+      }
+      userNames.push(user.profile.nickname)
+    }
+
     const createRoom = this.roomsRepository.create({
-      roomName: createRoomDto.roomName ?? createRoomDto.userIds.join(','),
+      roomName: roomName ?? userNames.join(', '),
       userList: createRoomDto.userIds.map(id => ({ id }))
     })
     const saveRoom = await this.roomsRepository.save(createRoom)
@@ -38,14 +55,19 @@ export class RoomsService {
   }
 
   /** 채팅방 조회 */
-  paginateRooms(dto: RoomsPaginationDto) {
+  paginateRooms(
+    dto: RoomsPaginationDto,
+    findOptions?: FindManyOptions<RoomsModel>
+  ) {
     return this.commonService.paginate(
       dto,
       this.roomsRepository,
       {
+        ...findOptions,
         relations: {
-          bookmarks: true,
-          userList: true
+          bookmarks: {
+            user: true
+          }
         }
       },
       'rooms'
@@ -60,13 +82,22 @@ export class RoomsService {
   }
 
   async findAllRoom(user: UsersModel, dto: RoomsPaginationDto) {
-    const rooms = await this.paginateRooms(dto)
+    const rooms = await this.paginateRooms(dto, {
+      where: {
+        userList: {
+          id: user.id
+        }
+      }
+    })
     const bookmarkRooms = rooms.data.map(({ bookmarks, ...room }) => ({
       ...room,
       isBookmarked: this.checkingBookMark(bookmarks, user)
     }))
 
-    return bookmarkRooms
+    return {
+      ...rooms,
+      data: bookmarkRooms
+    }
   }
 
   async findOne(id: number, user: UsersModel) {
