@@ -24,11 +24,11 @@ export class MessagesService {
           }
         },
         relations: {
-          user: true,
-          room: true
+          user: true
+          // room: true
         }
       },
-      'chats'
+      `chats/${cid}/messages`
     )
   }
 
